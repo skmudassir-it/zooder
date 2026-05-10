@@ -17,5 +17,4 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 EXPOSE 3000
-# Force cache bust v2 — run migration then start
-CMD ["sh", "-c", "echo 'Running migrations...' && npx prisma migrate deploy && echo 'Starting server...' && node server.js"]
+CMD ["node", "server.js"]
