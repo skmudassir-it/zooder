@@ -1,11 +1,12 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 COPY package*.json ./
+COPY apps/web/package*.json ./apps/web/
 RUN npm ci
 
 FROM base AS builder
 COPY . .
-COPY prisma ./prisma/
+COPY apps/web/prisma ./prisma/
 RUN npx prisma generate
 RUN npm run build
 
