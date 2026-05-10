@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-zooder}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: zooder_db
+    networks:
+      - zooder
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - zooder
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    networks:
+      - zooder
+    volumes:
+      - miniodata:/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    networks:
+      - zooder
+    restart: unless-stopped
+
+  ws-server:
+    build:
+      context: ./apps/ws-server
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - zooder
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+
+networks:
+  zooder:
+
+volumes:
+  pgdata:
+  miniodata:

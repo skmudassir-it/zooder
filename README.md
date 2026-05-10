@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zooder Monorepo
 
-## Getting Started
+> A full-stack social media app — Next.js 16 + Tailwind CSS v4 + shadcn/ui + Socket.IO + Prisma
 
-First, run the development server:
+## Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+zooder/
+├── apps/
+│   ├── web/          # Next.js 16 frontend + API routes
+│   └── ws-server/    # Standalone Socket.IO server
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Quick Start (Dev)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. Clone and install
+git clone https://github.com/skmudassir-it/zooder.git
+cd zooder
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. Start dev services (Postgres, Redis, MinIO)
+docker compose -f docker-compose.dev.yml up -d
 
-## Learn More
+# 3. Copy env files and fill secrets
+cp apps/web/.env.example apps/web/.env
+cp apps/ws-server/.env.example apps/ws-server/.env
 
-To learn more about Next.js, take a look at the following resources:
+# 4. Run migrations
+cd apps/web && npx prisma migrate dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 5. Start dev servers
+npm run dev       # Next.js on :3000
+npm run ws:dev    # WebSocket on :3001
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Styling | Tailwind CSS v4 |
+| UI | shadcn/ui |
+| Auth | Auth.js v5 (JWT + HttpOnly cookies) |
+| ORM | Prisma + PostgreSQL |
+| Real-time | Socket.IO + Redis |
+| State | Zustand |
+| Storage | MinIO |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment (Coolify)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `docker-compose.prod.yml` for service definitions. Each app has its own `Dockerfile`.
